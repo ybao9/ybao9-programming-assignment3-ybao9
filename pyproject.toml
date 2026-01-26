@@ -1,0 +1,25 @@
+[project]
+name = "pa3"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ipython>=8.27.0",
+    "pytest>=8.3.3",
+    "rich>=13.9.2",
+    "ruff>=0.6.4",
+]
+
+
+[tool.ruff.lint]
+select = [
+  "E", # pycodestyle errors - handles basic Python style
+  "W", # pycodestyle warnings - handles whitespace issues
+  "F", # pyflakes - handles unused imports and variables
+  "N", # pep8-naming - handles naming conventions
+]
+ignore = [
+  "F401", # allow unused imports (useful for assignments)
+  "N818",
+]
