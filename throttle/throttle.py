@@ -17,46 +17,38 @@ def throttle(max_calls=5):
 
     which maps argument keys to call counts.
     """
+    from functools import wraps
 
     def decorator(func):
         # You may want a dictionary here to track call counts
 
         counts = {}
-        typed_counts = {}
-        
+
+        def norm(x):
+            if isinstance(x, float):
+                return ("float", x)
+            if isinstance(x, bool):
+                return ("bool", x)
+            return x
+      
+        @wraps(func)
         def wrapper(*args, **kwargs):
+            norm_args = tuple(norm(a) for a in args)
 
             if kwargs:
-                key = (args, tuple(sorted(kwargs.items())))
+                norm_kwargs = tuple((k, norm(v)) for k, v in sorted(kwargs.items()))
+                key = norm_args + norm_kwargs
             else:
-                key = args
+                key = norm_args
 
-            typed_args = tuple((type(a), a) for a in args)
-            if kwargs:
-                typed_kwargs = tuple((k, type(v), v) for k, v in sorted(kwargs.items()))
-                typed_key = (typed_args, typed_kwargs)
-            else:
-                typed_key = typed_args
-
-            if typed_key not in typed_counts:
-                typed_counts[typed_key] = 0
-
-            if key not in counts:
-                counts[key] = 0
-
-            if typed_counts[typed_key] >= max_calls:
+            if counts.get(key, 0) >= max_calls:
                 raise RuntimeError
 
-            typed_counts[typed_key] = typed_counts[typed_key] + 1
-            counts[key] = counts[key] + 1
-            
+            counts[key] = counts.get(key, 0) + 1
             return func(*args, **kwargs)
 
-        wrapper.call_counts = counts
-
         # Attach call_counts attribute to the wrapped function
-        # Example:
-        # wrapper.call_counts = {}
+        wrapper.call_counts = counts
 
         return wrapper
 
