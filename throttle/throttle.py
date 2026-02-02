@@ -29,18 +29,15 @@ def throttle(max_calls=5):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
+
             norm_args = tuple(norm(a) for a in args)
             if kwargs:
-                norm_kwargs = tuple(
-                    (k, norm(v)) for k, v in sorted(kwargs.items())
-                )
+                norm_kwargs = tuple((k, norm(v)) for k, v in sorted(kwargs.items()))
                 in_key = norm_args + norm_kwargs
             else:
                 in_key = norm_args
 
-            out_key = args if not kwargs else args + tuple(
-                v for _, v in sorted(kwargs.items())
-            )
+            out_key = args if not kwargs else args + tuple(v for i, v in sorted(kwargs.items()))
 
             if counts.get(in_key, 0) >= max_calls:
                 raise RuntimeError
