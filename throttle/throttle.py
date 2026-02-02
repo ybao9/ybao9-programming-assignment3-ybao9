@@ -25,26 +25,30 @@ def throttle(max_calls=5):
         counts = {}
 
         def norm(x):
-            if isinstance(x, float):
-                return ("float", x)
-            if isinstance(x, bool):
-                return ("bool", x)
-            return x
-      
+            return (type(x), x)
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             norm_args = tuple(norm(a) for a in args)
-
             if kwargs:
-                norm_kwargs = tuple((k, norm(v)) for k, v in sorted(kwargs.items()))
-                key = norm_args + norm_kwargs
+                norm_kwargs = tuple(
+                    (k, norm(v)) for k, v in sorted(kwargs.items())
+                )
+                in_key = norm_args + norm_kwargs
             else:
-                key = norm_args
+                in_key = norm_args
 
-            if counts.get(key, 0) >= max_calls:
+            out_key = args if not kwargs else args + tuple(
+                v for _, v in sorted(kwargs.items())
+            )
+
+            if counts.get(in_key, 0) >= max_calls:
                 raise RuntimeError
 
-            counts[key] = counts.get(key, 0) + 1
+            counts[in_key] = counts.get(in_key, 0) + 1
+
+            wrapper.call_counts[out_key] = counts[in_key]
+
             return func(*args, **kwargs)
 
         # Attach call_counts attribute to the wrapped function
