@@ -29,5 +29,5 @@ def remove_private(data):
 
     You must use a dictionary comprehension.
     """
-    return {k: data[k] for k in data if k[0] != "_"}
+    return {k: data[k] for k in data if not k.startswith("_")}
 
